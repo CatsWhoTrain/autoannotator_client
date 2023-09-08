@@ -1,0 +1,39 @@
+---
+# used for development/testing
+version: '3'
+services:
+  aa_client:
+    image: aa_client
+    build:
+      context: .
+      shm_size: '2gb'
+      dockerfile: docker/client.dockerfile
+    shm_size: '2gb'
+    runtime: nvidia
+    network_mode: 'bridge'
+#    volumes:
+#      - ${DATASETS_PATH}:/datasets
+#      - ${PROJECT_PATH}:/app
+    command: bash -c "python3 /app/main.py"
+    ports:
+      - 9111:8888
+    environment:
+      CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-0}
+  aa_frontend:
+    image: aa_frontend
+    build:
+      context: .
+      shm_size: '2gb'
+      dockerfile: docker/frontend.dockerfile
+    shm_size: '2gb'
+#    runtime: nvidia
+    network_mode: 'bridge'
+#    volumes:
+#      - ${DATASETS_PATH}:/datasets
+#      - ${PROJECT_PATH}:/app
+    command: bash -c "pwd && ls -al && yarn run dev"
+    ports:
+      - 9112:8888
+      - 5173:5173
+
+
