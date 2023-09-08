@@ -16,8 +16,9 @@ services:
 #      - ${PROJECT_PATH}:/app
     command: bash -c "python3 /app/main.py"
     ports:
-      - 9111:8888
+      - 8000:8888
     environment:
+      APP_PORT: 8000
       CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-0}
   aa_frontend:
     image: aa_frontend
@@ -31,7 +32,7 @@ services:
 #    volumes:
 #      - ${DATASETS_PATH}:/datasets
 #      - ${PROJECT_PATH}:/app
-    command: bash -c "pwd && ls -al && yarn run dev"
+    command: bash -c "pwd && ls -al && npm run dev"
     ports:
       - 9112:8888
       - 5173:5173

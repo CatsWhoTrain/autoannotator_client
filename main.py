@@ -6,6 +6,7 @@ from fastapi import FastAPI, UploadFile, Request
 from fastapi.staticfiles import StaticFiles
 import shortuuid
 import os
+import uvicorn
 
 app = FastAPI()
 
@@ -88,3 +89,7 @@ async def create_upload_files(files: list[UploadFile]):
             await out_file.write(content)
     Thread(target=asyncio.run, args=(helper(task_id),)).start()
     return {"task_id": task_id}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv('APP_PORT')))
