@@ -7,6 +7,8 @@ services:
     build:
       context: .
       dockerfile: docker/frontend.dockerfile
+      shm_size: '20gb'
+    shm_size: '20gb'
     command: bash -c "pwd && ls -al && npm run dev"
     ports:
       - 8080:8080
@@ -18,7 +20,13 @@ services:
     build:
       context: .
       dockerfile: docker/client.dockerfile
+      shm_size: '20gb'
+    shm_size: '20gb'
     command: bash -c "python3 /app/main.py"
+    volumes:
+      - ${PROJECT_PATH}/data:/app/data
+      - ${PROJECT_PATH}/detection:/usr/local/lib/python3.10/dist-packages/autoannotator/weights/detection/faces
+      - ${PROJECT_PATH}/weights/feature_extraction:/usr/local/lib/python3.10/dist-packages/autoannotator/weights/feature_extraction/faces
     ports:
       - 8000:8888
     tty: true

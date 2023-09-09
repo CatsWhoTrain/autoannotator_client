@@ -7,6 +7,8 @@ from fastapi.staticfiles import StaticFiles
 import shortuuid
 import os
 import uvicorn
+from src.run import run
+
 
 app = FastAPI()
 
@@ -69,12 +71,14 @@ async def helper(task_id: str):
     with open('annotations.json', 'r') as j:
         STATE[task_id]['result'] = j.read()
 
-    for i in range(101):
-        STATE[task_id]['progress'] = i
-        await asyncio.sleep(0.05)
+    # for i in range(101):
+    #     STATE[task_id]['progress'] = i
+    #     await asyncio.sleep(0.05)
+    task_dir = f'data/{task_id}/'
+    results = run(img_dir=task_dir)
     STATE[task_id]['status'] = 'done'
 
-    # STATE[task_id]['results'] = {}
+    STATE[task_id]['results'] = results
 
 
 @app.post("/upload")
