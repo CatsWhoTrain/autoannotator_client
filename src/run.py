@@ -27,20 +27,17 @@ def run(img_dir):
     models = [SCRFD(), YOLOv7()]
     fd_ensemble = FaceDetEnsemble(models=models)
 
-    print('det')
     # alignment
     regressor = ImageAlignmentRegression()
-    print('align')
 
     # feature extractor
     models = [FaceFeatureExtractorAdaface(), FaceFeatureExtractorInsightface()]
     fr_ensemble = FaceFeatureExtractionEnsemle(models=models)
     descriptors = []
-    print('feat')
 
     faces_arr = []
     face_id = 0
-    for img_ind, img_file in enumerate(img_files):
+    for photo_id, img_file in enumerate(img_files):
         assert Path(img_file).is_file()
         img = reader(img_file)
 
@@ -49,16 +46,17 @@ def run(img_dir):
         faces = fd_ensemble(img)
 
         for face in faces:
-            aligned_img = regressor(input_img, face.landmarks)
-            aligned_save_img = cv2.cvtColor(aligned_img, cv2.COLOR_RGB2BGR)
+            aligned_img = regressor(img, face.landmarks)
 
-            crop_path = f'clusters/{face_id}.jpg'
+            aligned_save_img = cv2.cvtColor(aligned_img, cv2.COLOR_RGB2BGR)
             cv2.imwrite(f'{clusters_dir}/{face_id}.jpg', aligned_save_img)
 
-            descriptor = fr_ensemble(face)
+            descriptor = fr_ensemble(aligned_img)
             descriptors.append(descriptor)
 
-            faces_arr.append((face, img_ind, img_file, face_id, (h, w), crop_path))
+            crop_path = f'clusters/{face_id}.jpg'
+
+            faces_arr.append((face, face_id, photo_id, img_file, crop_path, (h, w)))
             face_id += 1
 
         print(faces_arr)
@@ -79,11 +77,12 @@ def run(img_dir):
     # set clusters
     from collections import defaultdict
     clusters = defaultdict(list)
-    for (face, img_id, img_file, face_id, shape), label in zip(faces_arr, labels):
+    for face_meta, label in zip(faces_arr, labels):
+        face, face_id, photo_id, img_file, crop_path, (h, w) = face_meta
         clusters[label].append({
             'face_id': face_id,
-            'photo_id': img_id,
-            'image': img_file,
+            'photo_id': photo_id,
+            'image': crop_path,
         })
 
     for cluster_id, faces in clusters.items():
@@ -96,12 +95,14 @@ def run(img_dir):
     from collections import defaultdict
     faces = defaultdict(list)
     meta = {}
-    for (face, img_id, img_file, face_id, shape), label in zip(faces_arr, labels):
+    for face_meta, label in zip(faces_arr, labels):
+        face, face_id, photo_id, img_file, crop_path, (h, w) = face_meta
+
         landmarks = np.array(face.landmarks)
         landmarks = landmarks[:, :2].tolist()
 
-        meta[img_id] = (img_file, shape)
-        faces[img_id].append({
+        meta[photo_id] = (img_file, (h, w))
+        faces[photo_id].append({
             "face_id": face_id,
             "cluster_id": label,
             "x1": face.bbox[0],

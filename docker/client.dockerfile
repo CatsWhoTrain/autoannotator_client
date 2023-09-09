@@ -16,6 +16,4 @@ RUN pip3 install -r requirements.txt
 
 RUN pip3 install autoannotator==0.0.6
 
-COPY src /app/src
-COPY test.py /app/test.py
 COPY main.py /app/main.py
